@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       MANIFEST_BRANCH:
-        description: 'OrangeFox Branch'
+        description: 'OrangeFox Manifest Branch'
         required: true
         default: '12.1'
         type: choice

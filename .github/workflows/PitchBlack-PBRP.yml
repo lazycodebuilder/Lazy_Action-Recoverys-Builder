@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       MANIFEST_BRANCH:
-        description: 'Manifest Branch'
+        description: 'PBRP Manifest Branch'
         required: true
         default: ''
         type: choice
