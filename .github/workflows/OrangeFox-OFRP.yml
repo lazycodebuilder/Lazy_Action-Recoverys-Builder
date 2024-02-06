@@ -116,7 +116,7 @@ jobs:
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
     - name: Check Manifest Branch
-      uses: haya14busa/action-cond@1.1.1
+      uses: haya14busa/action-cond@v1.1.1
       id: fox_branch
       with:
         cond: ${{ github.event.inputs.MANIFEST_BRANCH == '11.0' || github.event.inputs.MANIFEST_BRANCH == '12.1' }}
