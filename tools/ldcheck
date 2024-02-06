@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+
+# Dynamic linking consistency checker
+# hacked together by _that@xda, 2014-12 to 2022-03
+
+import os
+import string
+import argparse
+
+
+def ldcheck(files, libpath, printalldefined, printresolved, demangle):
+    nmopts = "-C" if demangle else ""
+    libs = files
+    libswithpath = []
+
+    # find all dependencies
+    for filename in libs:
+        if not os.path.isfile(filename) and libpath:
+            filename = findlibraryinpath(filename, libpath)
+        libswithpath.append(filename)
+        with os.popen("readelf -d {0} | grep '\(NEEDED\)' | sed -r 's/.*\[(.*)\]/\\1/'".format(filename)) as f:
+            for line in f:
+                dependency = line.rstrip()
+                if dependency not in libs:
+                    libs.append(dependency)
+
+    print("libs:", libswithpath)
+    libsused = set((libswithpath[0],))
+
+    # read all defined symbols
+    syms = {}
+    for filename in libswithpath:
+        for sym in readsymbols(filename, nmopts):
+            if sym["type"] != "U":
+                # TODO: support symbols defined by multiple libs properly, and weak symbols
+                # TODO: more proper handling of symbol versions, see https://maskray.me/blog/2020-11-26-all-about-symbol-versioning
+                if "@@" in sym["name"]:
+                    syms[sym["name"].replace("@@", "@")] = {"type": sym["type"], "file": filename}
+                    syms[sym["name"].split("@@")[0]] = {"type": sym["type"], "file": filename}
+                else:
+                    syms[sym["name"]] = {"type": sym["type"], "file": filename}
+
+    # resolve unresolved
+    for filename in libswithpath:
+        for sym in readsymbols(filename, nmopts):
+            if sym["type"] == "U":
+                resolved = syms.get(sym["name"])
+                if resolved:
+                    if filename in libsused:
+                        libsused.add(resolved["file"])
+                    if printresolved:
+                        print("{0:25} {1:25} {2} {3}".format(filename, resolved["file"], resolved["type"], sym["name"]))
+                else:
+                    print("{0:25} {1:25} U {2}".format(filename, "UNRESOLVED #####", sym["name"]))
+            else:
+                if printalldefined:
+                    print("{0:25}                  {1}".format(filename, sym["line"]))
+
+    unused = set(libswithpath) - libsused
+    if unused:
+        print("unused:", unused)
+
+
+def findlibraryinpath(filename, searchpath):
+    for d in searchpath.split(os.pathsep):
+        filepath = os.path.join(d, filename)
+        if os.path.isfile(filepath):
+            return filepath
+    return filename
+
+
+"""
+output format of nm:
+00003004 A __bss_start
+         U __cxa_atexit
+"""
+def readsymbol(line):
+    s = line if line[0] == " " else line.lstrip(string.hexdigits)
+    s = s.lstrip()
+    return {"type": s[0], "name": s[2:], "line": line}
+
+
+def readsymbols(filename, nmopts=""):
+    with os.popen("nm -D {0} {1}".format(nmopts, filename)) as f:
+        for line in f:
+            yield readsymbol(line.rstrip())
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Check dynamic linkage consistency by matching defined vs unresolved symbols.')
+    parser.add_argument('files', metavar='FILE', nargs='+', help="a dynamically linked executable or library.")
+    parser.add_argument('-p', '--path', help="Search path for libraries (use like LD_LIBRARY_PATH)")
+    parser.add_argument('-r', '--resolved', action='store_true', help="Print resolved symbols. By default only unresolved symbols are printed.")
+    parser.add_argument('-a', '--alldefined', action='store_true', help="Print all defined symbols")
+    parser.add_argument('-d', '--demangle', action='store_true', help="Demangle C++ names")
+
+    args = parser.parse_args()
+    ldcheck(args.files, args.path, args.alldefined, args.resolved, args.demangle)
