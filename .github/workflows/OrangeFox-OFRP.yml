@@ -116,7 +116,7 @@ jobs:
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
     - name: Check Manifest Branch
-      uses: haya14busa/action-cond@v1
+      uses: haya14busa/action-cond@1.1.1
       id: fox_branch
       with:
         cond: ${{ github.event.inputs.MANIFEST_BRANCH == '11.0' || github.event.inputs.MANIFEST_BRANCH == '12.1' }}
@@ -159,7 +159,7 @@ jobs:
 
     - name: Upload to Release
       if: env.CHECK_IMG_IS_OK == 'true' && env.CHECK_ZIP_IS_OK == 'true'
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@master
       with:
         files: |
           OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.img
