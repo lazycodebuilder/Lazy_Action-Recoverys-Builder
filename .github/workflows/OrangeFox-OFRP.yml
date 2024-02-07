@@ -115,19 +115,10 @@ jobs:
         cd ${{ github.event.inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-    - name: Installing python2 for legacy builds<
+    - name: Installing python2 for legacy builds
       if: env.CHECK_LEGACY_BRANCH == 'true'
       run: |
         sudo apt-get install python2 python-is-python2
-
-    - name: Setup for building OrangeFox
-      run: |
-        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
-        if [ ${{ github.event.inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ github.event.inputs.MANIFEST_BRANCH }} == '12.1' ]; then
-            lunch twrp_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image
-        else
-            lunch omni_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && mka ${{ github.event.inputs.BUILD_TARGET }}image
-        fi
 
     - name: Building OrangeFox
       run: |
@@ -136,7 +127,11 @@ jobs:
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         set -e
-        ${{ steps.fox_branch.outputs.value }}
+        if [ ${{ github.event.inputs.MANIFEST_BRANCH }} == '11.0' ] || [ ${{ github.event.inputs.MANIFEST_BRANCH }} == '12.1' ]; then
+            lunch twrp_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image
+        else
+            lunch omni_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && mka ${{ github.event.inputs.BUILD_TARGET }}image
+        fi
 
     - name: Set Build Date # For Build Date Info, currently using Asia/Manila
       run: |
