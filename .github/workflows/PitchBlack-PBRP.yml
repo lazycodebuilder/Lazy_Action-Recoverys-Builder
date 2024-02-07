@@ -147,7 +147,7 @@ jobs:
       run: |
         sudo apt-get install python2 python-is-python2
 
-    - name: Building Image
+    - name: Building PitchBlack
       run: |
         cd android-recovery
         source build/envsetup.sh
@@ -170,7 +170,7 @@ jobs:
         echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
 
     - name: Upload to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@master
       with:
         files: |
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img

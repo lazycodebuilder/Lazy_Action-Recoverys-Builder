@@ -85,7 +85,7 @@ jobs:
       with:
         swap-size-gb: 12
 
-    - name: Check Manifest Branch and legacy Branch
+    - name: Check Manifest Branch
       run: |
         if [ ${{ github.event.inputs.MANIFEST_BRANCH }} == 'twrp-11' ] || [ ${{ github.event.inputs.MANIFEST_BRANCH }} == 'twrp-12.1' ]; then
             echo "MANIFEST=https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git" >> $GITHUB_ENV
@@ -174,7 +174,7 @@ jobs:
         echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
       
     - name: Upload to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@master
       with:
         files: |
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img
