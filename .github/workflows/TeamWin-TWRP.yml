@@ -159,6 +159,16 @@ jobs:
         lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
 
+    - name: Set build target for upload
+      run: |
+        if [ ${{ github.event.inputs.BUILD_TARGET }} == 'recovery' ]; then
+           echo "BUILD_TARGET_NAME=recovery" >> $GITHUB_ENV
+        elif [ ${{ github.event.inputs.BUILD_TARGET }} == 'boot' ]; then
+           echo "BUILD_TARGET_NAME=boot" >> $GITHUB_ENV
+        else
+           echo "BUILD_TARGET_NAME=vendor_boot" >> $GITHUB_ENV
+        fi
+
     - name: Set Build Date # Output will be use in Release
       run: |
         echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
@@ -167,7 +177,8 @@ jobs:
       uses: softprops/action-gh-release@master
       with:
         files: |
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.img
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk*.img
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.gz
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.lz4
         name: Unofficial TWRP for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}

@@ -154,6 +154,17 @@ jobs:
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ env.DEVICE_MAKEFILE }}-eng && mka ${{ github.event.inputs.BUILD_TARGET }}
 
+    - name: Check Build Makefile
+      run: |
+        cd android-recovery
+        if [ -f out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img ]; then
+            echo "BUILD_TARGET_NAME=recovery" >> $GITHUB_ENV
+        elif [ -f out/target/product/${{ github.event.inputs.DEVICE_NAME }}/boot.img ]; then
+            echo "BUILD_TARGET_NAME=boot" >> $GITHUB_ENV
+        else
+            echo "BUILD_TARGET_NAME=vendor_boot" >> $GITHUB_ENV
+        fi
+
     - name: Set Build Date # Output will be use in Release
       run: |
         echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
@@ -162,8 +173,9 @@ jobs:
       uses: softprops/action-gh-release@master
       with:
         files: |
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.img
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP*.zip
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk*.img
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.gz
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.lz4
         name: Unofficial PBRP for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
