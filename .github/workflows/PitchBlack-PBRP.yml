@@ -175,9 +175,7 @@ jobs:
         files: |
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP*.zip
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk*.img
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.gz
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.lz4
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk-recovery.*
         name: Unofficial PBRP for ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |

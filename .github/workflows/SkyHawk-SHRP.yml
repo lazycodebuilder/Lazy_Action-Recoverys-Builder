@@ -6,13 +6,14 @@ on:
       MANIFEST:
         description: 'SHRP Manifest'
         required: true
-        default: 'https://github.com/lazymeao/manifest_sh.git'
+        default: 'https://github.com/SHRP/manifest.git'
       MANIFEST_BRANCH:
         description: 'SHRP Manifest Branch'
         required: true
         default: ''
         type: choice
         options:
+        - shrp-12.1
         - v3_11.0
         - v3_10.0
         - v3_9.0
@@ -174,9 +175,7 @@ jobs:
         files: |
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ env.BUILD_TARGET_NAME }}.img
           android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/SHRP*.zip
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk*.img
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.gz
-          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.lz4
+          android-recovery/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/ramdisk-recovery.*
         name: Unofficial SHRP For ${{ github.event.inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
