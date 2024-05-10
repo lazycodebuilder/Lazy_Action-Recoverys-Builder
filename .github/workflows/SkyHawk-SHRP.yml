@@ -6,7 +6,7 @@ on:
       MANIFEST:
         description: 'SHRP Manifest'
         required: true
-        default: 'https://github.com/SHRP/manifest.git'
+        default: 'https://github.com/SHRP-Reborn/manifest.git'
       MANIFEST_BRANCH:
         description: 'SHRP Manifest Branch'
         required: true
@@ -14,8 +14,6 @@ on:
         type: choice
         options:
         - shrp-12.1
-        - v3_11.0
-        - v3_10.0
         - v3_9.0
       DEVICE_TREE:
         description: 'Custom Recovery Tree' # Your already made Device Tree for TWRP
