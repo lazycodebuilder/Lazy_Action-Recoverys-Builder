@@ -19,19 +19,19 @@ on:
       DEVICE_TREE:
         description: 'Custom Recovery Tree'
         required: true
-        default: 'https://github.com/lazycodebuilder/recovery_rmx1851'
+        default: 'https://github.com/Badmaneers/custom-recovery_rmx3430_rui4.git'
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'android-14_ofrp'
+        default: 'ofox'
       DEVICE_PATH:
         description: 'Specify your device path.'
         required: true
-        default: 'device/realme/RMX1851'
+        default: 'device/realme/RMX3430'
       DEVICE_NAME:
         description: 'Specify your Device Codename.'
         required: true
-        default: 'RMX1851'
+        default: 'RMX3430'
       BUILD_TARGET:
         description: 'Specify your Build Target'
         required: true
