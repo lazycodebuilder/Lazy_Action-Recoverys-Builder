@@ -58,10 +58,10 @@ jobs:
     - name: Display Inputs
       run: |
         echo "Displaying variables/inputs."
-        echo "Manifest Branch: ${{ github.event.inputs.MANIFEST_BRANCH }}"
-        echo "Device Tree: ${{ github.event.inputs.DEVICE_TREE }}"
-        echo "Device Branch: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}"
-        echo "Build Target: ${{ github.event.inputs.BUILD_TARGET }}image"
+        echo "Manifest Branch: ${{ inputs.MANIFEST_BRANCH }}"
+        echo "Device Tree: ${{ inputs.DEVICE_TREE }}"
+        echo "Device Branch: ${{ inputs.DEVICE_TREE_BRANCH }}"
+        echo "Build Target: ${{ inputs.BUILD_TARGET }}image"
 
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
@@ -73,7 +73,7 @@ jobs:
 
     - name: Check Manifest Branch
       run: |
-        if [ ${{ github.event.inputs.MANIFEST_BRANCH }} == 'v3_11.0' ] || [ ${{ github.event.inputs.MANIFEST_BRANCH }} == 'shrp-12.1' ]; then
+        if [ ${{ inputs.MANIFEST_BRANCH }} == 'v3_11.0' ] || [ ${{ inputs.MANIFEST_BRANCH }} == 'shrp-12.1' ]; then
             echo "CHECK_LEGACY_BRANCH=false" >> $GITHUB_ENV
         else
             echo "CHECK_LEGACY_BRANCH=true" >> $GITHUB_ENV
@@ -104,7 +104,7 @@ jobs:
         cd android-recovery
         git config --global user.name "lazycodebuilder"
         git config --global user.email "154446636+lazycodebuilder@users.noreply.github.com"
-        repo init --depth=1 -u ${{ github.event.inputs.MANIFEST }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
+        repo init --depth=1 -u ${{ inputs.MANIFEST }} -b ${{ inputs.MANIFEST_BRANCH }}
 
     - name: Repo Sync
       run: |
@@ -114,7 +114,7 @@ jobs:
     - name: Clone Device Tree
       run: |
         cd android-recovery
-        git clone ${{ github.event.inputs.DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./device_tree
+        git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./device_tree
         cd device_tree
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
@@ -160,14 +160,14 @@ jobs:
         cd android-recovery
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
-        lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && mka ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
-        echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
+        lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && mka ${{ inputs.BUILD_TARGET }}image -j$(nproc --all)
+        echo "Done building your ${{ inputs.BUILD_TARGET }}.img"
 
     - name: Set build target for upload
       run: |
-        if [ ${{ github.event.inputs.BUILD_TARGET }} == 'recovery' ]; then
+        if [ ${{ inputs.BUILD_TARGET }} == 'recovery' ]; then
            echo "BUILD_TARGET_NAME=recovery" >> $GITHUB_ENV
-        elif [ ${{ github.event.inputs.BUILD_TARGET }} == 'boot' ]; then
+        elif [ ${{ inputs.BUILD_TARGET }} == 'boot' ]; then
            echo "BUILD_TARGET_NAME=boot" >> $GITHUB_ENV
         else
            echo "BUILD_TARGET_NAME=vendor_boot" >> $GITHUB_ENV
@@ -187,17 +187,17 @@ jobs:
         name: Unofficial SHRP For ${{ env.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
-          Build: ${{ github.event.inputs.MANIFEST_BRANCH }}
-          Device: [Device Tree/Branch](${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }})
-          Commit: Most recent [commit](${{ github.event.inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
+          Build: ${{ inputs.MANIFEST_BRANCH }}
+          Device: [Device Tree/Branch](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
+          Commit: Most recent [commit](${{ inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
 
     - name: Run LDCheck
-      if: github.event.inputs.LDCHECK == 'true'
+      if: inputs.LDCHECK == 'true'
       run: |
         cd tools
         mv -n libneeds ${GITHUB_WORKSPACE}/android-recovery/out/target/product/${{ env.DEVICE_NAME }}/recovery/root/
         mv -n ldcheck ${GITHUB_WORKSPACE}/android-recovery/out/target/product/${{ env.DEVICE_NAME }}/recovery/root/
         cd ../android-recovery/out/target/product/${{ env.DEVICE_NAME }}/recovery/root
-        python3 ldcheck -p system/lib64:vendor/lib64:system/lib:vendor/lib -d ${{ github.event.inputs.LDCHECKPATH }}
+        python3 ldcheck -p system/lib64:vendor/lib64:system/lib:vendor/lib -d ${{ inputs.LDCHECKPATH }}
         echo "Done checking missing dependencies. Review, and reconfigure your tree."
       continue-on-error: true
