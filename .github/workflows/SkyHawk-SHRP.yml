@@ -14,7 +14,7 @@ on:
         type: choice
         options:
         - shrp-12.1
-        - v3_9.0
+        - shrp-9.0
       DEVICE_TREE:
         description: 'Custom Recovery Tree' # Your already made Device Tree for TWRP
         required: true
